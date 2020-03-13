@@ -9,6 +9,7 @@ import geopandas
 import pandas as pd
 import math
 import numpy as np
+import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime as dt
 
@@ -26,21 +27,6 @@ def geo_convert(file_name):
     frame = geopandas.GeoDataFrame(
         frame, geometry=geopandas.points_from_xy(frame.Long, frame.Lat))
     return frame
-
-
-def distance_hubei(lat, long):
-    lat_hubei = geo_confirmed[geo_confirmed['Province/State'] == 'Hubei']['Lat']
-    long_hubei = geo_confirmed[geo_confirmed['Province/State'] == 'Hubei']['Long']
-    lat_dest = lat
-    long_dest = long
-    radius = 6371 # km
-    dlat = math.radians(lat_dest-lat_hubei)
-    dlon = math.radians(long_dest-long_hubei)
-    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat_hubei)) \
-        * math.cos(math.radians(lat_dest)) * math.sin(dlon/2) * math.sin(dlon/2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    d = radius * c
-    return d
 
 
 def log_unless_zero(input):
@@ -78,17 +64,6 @@ geo_confirmed = geo_convert('covid19_confirmed.csv')
 geo_deaths = geo_convert('covid19_deaths.csv')
 geo_recovered = geo_convert('covid19_recovered.csv')
 
-
-"""
-At a later date reimplement Distance to Hubei column. Was working
-but now getting cannot convert series to float error. Besides uncommenting
-this code chunk, also need to add 'Distance_Hubei(km)' back to the columns
-being marked as id columns in geo_melter().
-"""
-#geo_confirmed['Distance_Hubei_(km)'] = geo_confirmed.apply(lambda x: distance_hubei(x['Lat'], x['Long']), axis=1)
-#geo_deaths['Distance_Hubei_(km)'] = geo_deaths.apply(lambda x: distance_hubei(x['Lat'], x['Long']), axis=1)
-#geo_recovered['Distance_Hubei_(km)'] = geo_recovered.apply(lambda x: distance_hubei(x['Lat'], x['Long']), axis=1)
-
 geo_confirmed_melted = geo_melter(geo_confirmed, 'Confirmed')
 geo_deaths_melted = geo_melter(geo_deaths, 'Deaths')
 geo_recovered_melted = geo_melter(geo_recovered, 'Recovered')
@@ -99,19 +74,16 @@ cols_to_use = geo_recovered_melted.columns.difference(geo_master.columns)
 geo_master = pd.merge(geo_master, geo_recovered_melted[cols_to_use], left_index=True, right_index=True, how='outer')
 
 geo_master['Confirmed_Size'] = geo_master.apply(lambda x: log_unless_zero(x['Confirmed']), axis=1)
-geo_master.head()
+geo_master['Deaths_Color'] = geo_master.apply(lambda x: log_unless_zero(x['Deaths']), axis=1)
+geo_master.loc[geo_master['Province/State'].isnull(), 'Province/State'] = geo_master['Country/Region']
+
 geo_master['text'] = (', Confirmed: ' + geo_master['Confirmed'].astype(str)
                       + ', Deaths: ' + geo_master['Deaths'].astype(str)
                       + ', Recovered: ' + geo_master['Recovered'].astype(str))
 
 geo_master['date'] = pd.to_datetime(geo_master['date'], format='%m/%d/%y')
 
-
-
-"""
-Make an interactive table that returns number of people confirmed, dead, recovered in the date range specified
-and the location specified. Drop downs for location and text input for date. 
-"""
+scl = [[0, '#8c96c6'],[0.33, '#8c6bb1'],[0.66, '#88419d'],[1.0, '#6e016b']]\
 
 
 app = dash.Dash('Corona Virus Visual')
@@ -131,8 +103,90 @@ app.layout = html.Div([
             date=geo_master['date'].min()
         )
     ),
-    html.Div(id='corona_map_by_date')
+    html.Div(id='corona_map_by_date'),
+    html.Div([
+        html.Div([
+            html.Div(
+                dcc.Dropdown(
+                    id='loc_drop_down_1',
+                    options=[{'label': i, 'value': i} for i in geo_master['Province/State'].unique()],
+                    value='King County, WA'
+                ),
+                style={'width': '48%', 'display': 'inline-block'}
+            ),
+            html.Div(
+                dcc.Dropdown(
+                    id='loc_drop_down_2',
+                    options=[{'label': i, 'value': i} for i in geo_master['Province/State'].unique()],
+                    value='Hubei'
+                ),
+                style={'width': '48%', 'align': 'right', 'display': 'inline-block'}
+            )
+        ]),
+        html.Div([
+            html.Div(
+                dcc.Graph(
+                    id='loc_graph_1'
+                ),
+                style={'width': '48%', 'display': 'inline-block'}
+            ),
+            html.Div(
+                dcc.Graph(
+                    id='loc_graph_2'
+                ),
+                style={'width': '48%', 'align': 'right', 'display': 'inline-block'}
+            )
+        ])
+    ])
 ])
+
+
+
+@app.callback(
+    Output(component_id='loc_graph_1', component_property='figure'),
+    [Input(component_id='loc_drop_down_1', component_property='value')]
+)
+def update_loc_graph_1(value):
+    geo_master_subset = geo_master[geo_master['Province/State'] == value]
+    fig = go.Figure(
+        data=go.Scatter(
+            x=geo_master_subset['date'],
+            y=geo_master_subset['Confirmed'],
+            name='Confirmed Cases'
+        )
+    )
+    fig.add_scatter(x=geo_master_subset['date'], y=geo_master_subset['Deaths'], name='Deaths')
+    fig.add_scatter(x=geo_master_subset['date'], y=geo_master_subset['Recovered'], name='Recovered')
+    fig.update_layout(
+        title=value,
+        xaxis_title="Date",
+        yaxis_title="Number of People"
+    )
+    return fig
+
+
+@app.callback(
+    Output(component_id='loc_graph_2', component_property='figure'),
+    [Input(component_id='loc_drop_down_2', component_property='value')]
+)
+def update_loc_graph_2(value):
+    geo_master_subset = geo_master[geo_master['Province/State'] == value]
+    fig = go.Figure(
+        data=[go.Scatter(
+            x=geo_master_subset['date'],
+            y=geo_master_subset['Confirmed'],
+            name='Confirmed Cases'
+        )]
+    )
+    fig.add_scatter(x=geo_master_subset['date'], y=geo_master_subset['Deaths'], name='Deaths')
+    fig.add_scatter(x=geo_master_subset['date'], y=geo_master_subset['Recovered'], name='Recovered')
+    fig.update_layout(
+        title=value,
+        xaxis_title="Date",
+        yaxis_title="Number of People"
+    )
+    return fig
+
 
 @app.callback(
     Output(component_id='corona_map_by_date', component_property='children'),
@@ -140,6 +194,36 @@ app.layout = html.Div([
 )
 def update_corona_map(date):
     geo_master_subset = geo_master[geo_master['date'] == date]
-    return dcc.Graph(id='corona_map', figure=px.scatter_geo(geo_master_subset, lat='Lat', lon='Long', size='Confirmed_Size', color='Deaths', hover_name='Province/State', text='text'))
+    fig = go.Figure(
+        go.Scattergeo(
+                     lon=geo_master_subset['Long'],
+                     lat=geo_master_subset['Lat'],
+                     mode='markers',
+                     customdata=np.stack((geo_master_subset['Confirmed'], geo_master_subset['Deaths'], geo_master_subset['Recovered'], geo_master_subset['Province/State']), axis=-1),
+                     marker=dict(
+                         size=geo_master_subset['Confirmed_Size']*1.75,
+                         color=geo_master_subset['Deaths_Color'],
+                         colorscale=scl
+                     ),
+                     hovertemplate='<b>%{customdata[3]}</b><br><br>' + 
+                                   '<b>Confirmed Cases</b>: %{customdata[0]}<br>' +
+                                   '<b>Deaths</b>: %{customdata[1]}<br>' +
+                                   '<b>Recovered</b>: %{customdata[2]}'
+                     )
+    )
+    fig.update_geos(
+        showcountries=True,
+        projection_type='natural earth',
+        landcolor='#cccccc',
+        showocean=True,
+        oceancolor='#a8d7ff'
+    )
+    fig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
+    return dcc.Graph(id='corona_map', figure=fig)
+
+
+app.css.append_css({
+    'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
+})
 
 app.server.run()
