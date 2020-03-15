@@ -3,18 +3,18 @@ Maxwell Haak
 Final Project
 3/12/20
 Program requests and stores data from a github repo, transforms and cleans data
-for processing, calcultaes aggregate statistics, creates an animated map 
+for processing, calcultaes aggregate statistics, creates an animated map
 representing the spread of corona virus over time, and creates a dash app that
 lets users interact with the map and line graph figures manually.
 """
 # imports for dash app
 import dash
-import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
-import master from data.py
+import numpy as np
+import master
 
 
 # Setting color scale for corona virus map.
@@ -68,7 +68,7 @@ app.layout = html.Div(
                    at any of these links:
                    - The Dataset these visualizations use:
                    https://github.com/CSSEGISandData/2019-nCoV
-                   - Visualization by Johns Hopkins: 
+                   - Visualization by Johns Hopkins:
                    - The ourworldindata page for Corona Virus:
                    To the best of my knowledge all of these links are safe to
                    follow.''',
@@ -90,14 +90,6 @@ app.layout = html.Div(
                 html.Div(
                     dcc.Graph(id='corona_map'),
                     style={'width': '70%', 'display': 'inline-block'}
-                ),
-                html.Div(
-                    dash_table.DataTable(
-                        id='ag_table',
-                        columns=[{"name": i, "id": i} for i in aggregate_val.columns],
-                        data=aggregate_val.to_dict('records'),
-                    ),
-                    style={'width': '18%', 'align': 'right', 'display': 'inline-block'}
                 )
             ])
         ]),
@@ -106,18 +98,23 @@ app.layout = html.Div(
                 html.Div(
                     dcc.Dropdown(
                         id='loc_drop_down_1',
-                        options=[{'label': i, 'value': i} for i in master['Province/State'].unique()],
-                        value='Washington'
+                        options=[{'label': i, 'value': i} for i in
+                                 master['Province/State'].unique()],
+                        value='Italy'
                     ),
-                    style={'width': '48%', 'display': 'inline-block'}
+                    style={'width': '48%',
+                           'display': 'inline-block'}
                 ),
                 html.Div(
                     dcc.Dropdown(
                         id='loc_drop_down_2',
-                        options=[{'label': i, 'value': i} for i in master['Province/State'].unique()],
+                        options=[{'label': i, 'value': i} for i in
+                                 master['Province/State'].unique()],
                         value='Hubei'
                     ),
-                    style={'width': '48%', 'align': 'right', 'display': 'inline-block'}
+                    style={'width': '48%',
+                           'align': 'right',
+                           'display': 'inline-block'}
                 )
             ]),
             html.Div([
@@ -125,13 +122,16 @@ app.layout = html.Div(
                     dcc.Graph(
                         id='loc_graph_1'
                     ),
-                    style={'width': '48%', 'display': 'inline-block'}
+                    style={'width': '48%',
+                           'display': 'inline-block'}
                 ),
                 html.Div(
                     dcc.Graph(
                         id='loc_graph_2'
                     ),
-                    style={'width': '48%', 'align': 'right', 'display': 'inline-block'}
+                    style={'width': '48%',
+                           'align': 'right',
+                           'display': 'inline-block'}
                 )
             ])
         ])
@@ -155,8 +155,10 @@ def update_loc_graph_1(value):
             name='Confirmed Cases'
         )
     )
-    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Deaths'], name='Deaths')
-    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Recovered'], name='Recovered')
+    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Deaths'],
+                    name='Deaths')
+    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Recovered'],
+                    name='Recovered')
     fig.update_layout(
         title=value,
         xaxis_title="Date",
@@ -181,8 +183,10 @@ def update_loc_graph_2(value):
             name='Confirmed Cases'
         )]
     )
-    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Deaths'], name='Deaths')
-    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Recovered'], name='Recovered')
+    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Deaths'],
+                    name='Deaths')
+    fig.add_scatter(x=master_subset['date_time'], y=master_subset['Recovered'],
+                    name='Recovered')
     fig.update_layout(
         title=value,
         xaxis_title="Date",
@@ -205,15 +209,20 @@ def update_corona_map(date):
                      lon=master_subset['Long'],
                      lat=master_subset['Lat'],
                      mode='markers',
-                     customdata=np.stack((master_subset['Confirmed'], master_subset['Deaths'], master_subset['Recovered'], master_subset['Province/State']), axis=-1),
+                     customdata=np.stack((master_subset['Confirmed'],
+                                          master_subset['Deaths'],
+                                          master_subset['Recovered'],
+                                          master_subset['Province/State']),
+                                         axis=-1),
                      marker=dict(
                          size=master_subset['Confirmed_Size']*1.75,
                          color=master_subset['Deaths_Color'],
                          colorscale=scl,
                          colorbar_title='Deaths (Natural Log Scale)'
                      ),
-                     hovertemplate='<b>%{customdata[3]}</b><br><br>' + 
-                                   '<b>Confirmed Cases</b>: %{customdata[0]}<br>' +
+                     hovertemplate='<b>%{customdata[3]}</b><br><br>' +
+                                   '<b>Confirmed Cases</b>: %{customdata[0]}\
+                                    <br>' +
                                    '<b>Deaths</b>: %{customdata[1]}<br>' +
                                    '<b>Recovered</b>: %{customdata[2]}'
                      )
@@ -225,7 +234,7 @@ def update_corona_map(date):
         showocean=True,
         oceancolor='#a8d7ff'
     )
-    fig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
+    fig.update_layout(height=300, margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
 
 
@@ -235,6 +244,4 @@ app.css.append_css({
 })
 
 
-if __name__ == '__main__':
-    app.run_server()
-
+app.server.run()

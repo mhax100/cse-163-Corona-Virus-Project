@@ -25,7 +25,7 @@ def pd_0(file_name):
     return frame
 
 
-def log_unless_zero(input):
+def log_unless_0(input):
     """
     Takes an integer input and returns the log of the integer, unless
     the input is 0, in which case it returns 0. Mainly used to convert
@@ -44,15 +44,18 @@ def remove_us_counties(df):
     was implemented due to the discontinuation of data updates for counties in
     Johns Hopkins' Dataset.
     """
-    states = ('Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
-    'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois',
-    'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
-    'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana',
-    'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
-    'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-    'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
-    'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
-    'District of Columbia', 'Diamond Princess', 'Grand Princess')
+    states = ('Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+              'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
+              'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas',
+              'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
+              'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana',
+              'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+              'New Mexico', 'New York', 'North Carolina', 'North Dakota',
+              'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+              'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
+              'Vermont', 'Virginia', 'Washington', 'West Virginia',
+              'Wisconsin', 'Wyoming', 'District of Columbia',
+              'Diamond Princess', 'Grand Princess')
     not_state = (df['Province/State'].isin(states))
     is_us = df['Country/Region'] == 'US'
     is_not_us = df['Country/Region'] != 'US'
@@ -101,18 +104,27 @@ deaths = remove_us_counties(deaths)
 recovered = remove_us_counties(recovered)
 
 # Branching to country totals
-confirmed_by_Country = confirmed.groupby(['Country/Region'], as_index=False).sum()
-deaths_by_Country = deaths.groupby(['Country/Region'], as_index=False).sum()
-recovered_by_Country = recovered.groupby(['Country/Region'], as_index=False).sum()
+confirmed_by_Country = confirmed.groupby(['Country/Region'],
+                                         as_index=False).sum()
+deaths_by_Country = deaths.groupby(['Country/Region'],
+                                   as_index=False).sum()
+recovered_by_Country = recovered.groupby(['Country/Region'],
+                                         as_index=False).sum()
 
 # Transforming geopandas dataframe from multiple to one date column.
-confirmed = melter(confirmed, 'Confirmed', ['Province/State', 'Country/Region', 'Lat', 'Long'])
-deaths = melter(deaths, 'Deaths', ['Province/State', 'Country/Region', 'Lat', 'Long'])
-recovered = melter(recovered, 'Recovered', ['Province/State', 'Country/Region', 'Lat', 'Long'])
+confirmed = melter(confirmed, 'Confirmed', ['Province/State', 'Country/Region',
+                                            'Lat', 'Long'])
+deaths = melter(deaths, 'Deaths', ['Province/State', 'Country/Region', 'Lat',
+                                   'Long'])
+recovered = melter(recovered, 'Recovered', ['Province/State', 'Country/Region',
+                                            'Lat', 'Long'])
 
-confirmed_by_Country = melter(confirmed_by_Country, 'Confirmed', ['Country/Region','Lat', 'Long'])
-deaths_by_Country = melter(deaths_by_Country, 'Deaths', ['Country/Region','Lat', 'Long'])
-recovered_by_Country = melter(recovered_by_Country, 'Recovered', ['Country/Region','Lat', 'Long'])
+confirmed_by_Country = melter(confirmed_by_Country,
+                              'Confirmed', ['Country/Region', 'Lat', 'Long'])
+deaths_by_Country = melter(deaths_by_Country,
+                           'Deaths', ['Country/Region', 'Lat', 'Long'])
+recovered_by_Country = melter(recovered_by_Country,
+                              'Recovered', ['Country/Region', 'Lat', 'Long'])
 
 
 # Combining confirmed, deaths, and recovered data into one dataframe.
@@ -123,14 +135,19 @@ cols_to_use = recovered.columns.difference(master.columns)
 master = pd.merge(master, recovered[cols_to_use],
                   left_index=True, right_index=True, how='outer')
 
-cols_to_use = deaths_by_Country.columns.difference(confirmed_by_Country.columns)
-master_by_Country = pd.merge(confirmed_by_Country, deaths_by_Country[cols_to_use],
+conf_columns = confirmed_by_Country.columns
+cols_to_use = deaths_by_Country.columns.difference(conf_columns)
+master_by_Country = pd.merge(confirmed_by_Country,
+                             deaths_by_Country[cols_to_use],
                              left_index=True, right_index=True, how='outer')
-cols_to_use = recovered_by_Country.columns.difference(master_by_Country.columns)
-master_by_Country = pd.merge(master_by_Country, recovered_by_Country[cols_to_use],
+master_columns = master_by_Country.columns
+cols_to_use = recovered_by_Country.columns.difference(master_columns)
+master_by_Country = pd.merge(master_by_Country,
+                             recovered_by_Country[cols_to_use],
                              left_index=True, right_index=True, how='outer')
 
-master.loc[master['Province/State'].isnull(), 'Province/State'] = master['Country/Region']
+master.loc[master['Province/State'].isnull(),
+           'Province/State'] = master['Country/Region']
 
 # Space for computing summary statistics from dataset
 dates = master['date'].unique()
@@ -141,11 +158,11 @@ grouped_date = master.groupby(['date'], as_index=False)
 print(grouped_date['Confirmed'].sum())
 
 most_confirmed_province = today.loc[today['Confirmed'].idxmax(),
-                                        'Province/State']
+                                    'Province/State']
 most_deaths_province = today.loc[today['Deaths'].idxmax(),
-                                     'Province/State']
+                                 'Province/State']
 most_recovered_province = today.loc[today['Recovered'].idxmax(),
-                                        'Province/State']
+                                    'Province/State']
 
 today_by_Country = master_by_Country[master_by_Country['date'] == dates[-1]]
 confirmed_id = today_by_Country['Confirmed'].idxmax()
@@ -172,10 +189,11 @@ check = master[master['Province/State'] == 'Italy']
 print(check)
 
 
-
 # Creating columns for graphical display use.
-master['Confirmed_Size'] = master.apply(lambda x: log_unless_zero(x['Confirmed']), axis=1)
-master['Deaths_Color'] = master.apply(lambda x: log_unless_zero(x['Deaths']), axis=1)
+master['Confirmed_Size'] = master.apply(lambda x: log_unless_0(x['Confirmed']),
+                                        axis=1)
+master['Deaths_Color'] = master.apply(lambda x: log_unless_0(x['Deaths']),
+                                      axis=1)
 
 # Converting dates in the dataframe to datetime objects
 master['date_time'] = pd.to_datetime(master['date'], format='%m/%d/%y')
