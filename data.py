@@ -153,9 +153,7 @@ master.loc[master['Province/State'].isnull(),
 dates = master['date'].unique()
 today = master[master['date'] == dates[-1]]
 
-print(master)
 grouped_date = master.groupby(['date'], as_index=False)
-print(grouped_date['Confirmed'].sum())
 
 most_confirmed_province = today.loc[today['Confirmed'].idxmax(),
                                     'Province/State']
@@ -176,17 +174,8 @@ world_total_confirmed = today['Confirmed'].sum()
 world_total_deaths = today['Deaths'].sum()
 world_total_recovered = today['Recovered'].sum()
 
-aggregate_val = {'Total Confirmed Cases': [world_total_confirmed],
-                 'Total Deaths': [world_total_deaths],
-                 'Total Recovered': [world_total_recovered]}
-aggregate_val = pd.DataFrame(aggregate_val)
-print(aggregate_val)
-
-
 master['percent_deaths'] = master['Deaths'] / master['Confirmed']
 master['percent_recovered'] = master['Recovered'] / master['Confirmed']
-check = master[master['Province/State'] == 'Italy']
-print(check)
 
 
 # Creating columns for graphical display use.

@@ -43,7 +43,7 @@ app.layout = html.Div(
                    , and has many limitations. This visualization is in no way
                    affiliated with or represents Johns Hopkins University. As
                    information on Corona Virus and COVID-19 is constantly
-                   changing, the data presented here is likely to change and be
+                   changing, the data presented here is likely to be
                    updated more accurately as the state of available
                    information evolves. In addition, the dataset only measures
                    the number of Confirmed Cases (cases where the person has
@@ -51,11 +51,10 @@ app.layout = html.Div(
                    infected by COVID-19) and most likely does not represent
                    the total number of cases worldwide. This could be because
                    people who only present mild symptoms may never be tested
-                   and even when severe symptoms are presented not every
-                   country is equipped to test every person. Regardless of the
-                   reason, the number of total cases is most likely larger than
-                   the number of confirmed cases because not everyone that
-                   has been infected is necessarily tested.''',
+                   and not every country is equipped to test every person.
+                   Regardless of the reason, the number of total cases is
+                   most likely larger than the number of confirmed cases.
+                   ''',
                    style=text_style)
         ),
         html.Div([
@@ -64,16 +63,9 @@ app.layout = html.Div(
                    sources to learn more about COVID-19. Should the dataset
                    which these visualizations use change sifnificantly, the
                    data presented could become innacurate or out of date. As
-                   such, I encourage people to double check the information
-                   at any of these links:
-                   - The Dataset these visualizations use:
-                   https://github.com/CSSEGISandData/2019-nCoV
-                   - Visualization by Johns Hopkins:
-                   - The ourworldindata page for Corona Virus:
-                   To the best of my knowledge all of these links are safe to
-                   follow.''',
-                   style=text_style),
-            html.P('Test', style=text_style)
+                   such, I encourage people to double check the information.
+                   ''',
+                   style=text_style)
         ]),
         html.Div([
             html.Div(
