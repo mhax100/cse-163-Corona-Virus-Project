@@ -1,5 +1,11 @@
-import dates
-import master
+"""
+Maxwell Haak
+Final Project
+3/12/20
+Creates an animated map representing the spread of corona virus over time.
+"""
+from data.py import dates
+from data.py import master
 import numpy as np
 import plotly.graph_objects as go
 

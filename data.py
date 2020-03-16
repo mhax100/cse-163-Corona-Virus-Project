@@ -1,3 +1,10 @@
+"""
+Maxwell Haak
+Final Project
+3/12/20
+Program requests and stores data from a github repo, transforms and cleans data
+for processing, calcultaes aggregate statistics.
+"""
 # imports for data handling
 import requests
 import pandas as pd

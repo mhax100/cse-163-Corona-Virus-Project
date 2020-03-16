@@ -2,10 +2,8 @@
 Maxwell Haak
 Final Project
 3/12/20
-Program requests and stores data from a github repo, transforms and cleans data
-for processing, calcultaes aggregate statistics, creates an animated map
-representing the spread of corona virus over time, and creates a dash app that
-lets users interact with the map and line graph figures manually.
+Creates a dash app that lets users interact with the map and line graph
+figures manually.
 """
 # imports for dash app
 import dash
@@ -14,7 +12,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import numpy as np
-import master
+from data.py import master
 
 
 # Setting color scale for corona virus map.
