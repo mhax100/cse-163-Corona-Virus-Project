@@ -12,7 +12,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import numpy as np
-from data.py import master
+from data import master
+from data import today
 
 
 # Setting color scale for corona virus map.
@@ -79,7 +80,27 @@ app.layout = html.Div(
             html.Div([
                 html.Div(
                     dcc.Graph(id='corona_map'),
-                    style={'width': '70%', 'display': 'inline-block'}
+                    style={'width': '74%', 'display': 'inline-block'}
+                ),
+                html.Div([
+                    dcc.Dropdown(
+                            id='loc_drop_down_3',
+                            options=[{'label': i, 'value': i} for i in
+                                     today['Province/State'].unique()],
+                            value='Total'
+                    ),
+                    html.Div([
+                        html.Div(
+                            html.H1(id='Confirmed'), style={'height': '25%'}
+                        ),
+                        html.Div(
+                            html.H1(id='Deaths'), style={'height': '25%'}
+                        ),
+                        html.Div(
+                            html.H1(id='Recovered'), style={'height': '25%'}
+                        )
+                    ])
+                ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top'}
                 )
             ])
         ]),
@@ -130,14 +151,31 @@ app.layout = html.Div(
 
 
 @app.callback(
+    [Output(component_id='Confirmed', component_property='children'),
+     Output(component_id='Deaths', component_property='children'),
+     Output(component_id='Recovered', component_property='children')],
+    [Input(component_id='loc_drop_down_3', component_property='value')]
+)
+def update_confirmed_text(location):
+    today_subset = today[today['Province/State'] == location]
+    confirmed = int(today_subset['Confirmed'])
+    deaths = int(today_subset['Deaths'])
+    recovered = int(today_subset['Recovered'])
+    confirmed_str = 'Confirmed: ' + str(confirmed)
+    deaths_str = 'Deaths: ' + str(deaths)
+    recovered_str = 'Recovered: ' + str(recovered)
+    return confirmed_str, deaths_str, recovered_str
+
+
+@app.callback(
     Output(component_id='loc_graph_1', component_property='figure'),
     [Input(component_id='loc_drop_down_1', component_property='value')]
 )
-def update_loc_graph_1(value):
+def update_loc_graph_1(location):
     """
     Return line graph for specified location on app callback.
     """
-    master_subset = master[master['Province/State'] == value]
+    master_subset = master[master['Province/State'] == location]
     fig = go.Figure(
         data=go.Scatter(
             x=master_subset['date_time'],
@@ -150,7 +188,7 @@ def update_loc_graph_1(value):
     fig.add_scatter(x=master_subset['date_time'], y=master_subset['Recovered'],
                     name='Recovered')
     fig.update_layout(
-        title=value,
+        title=location,
         xaxis_title="Date",
         yaxis_title="Number of People"
     )

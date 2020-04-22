@@ -9,6 +9,7 @@ for processing, calcultaes aggregate statistics.
 import requests
 import pandas as pd
 import math
+import plotly.graph_objects as go
 
 
 # Various methods used for data handling
@@ -193,3 +194,9 @@ master['Deaths_Color'] = master.apply(lambda x: log_unless_0(x['Deaths']),
 
 # Converting dates in the dataframe to datetime objects
 master['date_time'] = pd.to_datetime(master['date'], format='%m/%d/%y')
+
+print(today)
+today.loc['Total', :] = today.sum()
+today.loc['Total', 'Province/State'] = 'Total'
+today.loc['Total', 'Country/Region'] = 'Total'
+print(today)

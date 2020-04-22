@@ -4,8 +4,8 @@ Final Project
 3/12/20
 Creates an animated map representing the spread of corona virus over time.
 """
-from data.py import dates
-from data.py import master
+from data import dates
+from data import master
 import numpy as np
 import plotly.graph_objects as go
 
