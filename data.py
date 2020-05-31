@@ -84,17 +84,11 @@ def melter(df, value_col, id_cols):
 
 
 # Setting url's for the three csv files used.
-url_confirmed = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/'
-                 'master/csse_covid_19_data/csse_covid_19_time_series/'
-                 'time_series_19-covid-Confirmed.csv')
+url_confirmed = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/archived_data/archived_time_series/time_series_19-covid-Confirmed_archived_0325.csv')
 
-url_deaths = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/'
-              'master/csse_covid_19_data/csse_covid_19_time_series/'
-              'time_series_19-covid-Deaths.csv')
+url_deaths = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/archived_data/archived_time_series/time_series_19-covid-Deaths_archived_0325.csv')
 
-url_recovered = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/'
-                 'master/csse_covid_19_data/csse_covid_19_time_series/'
-                 'time_series_19-covid-Recovered.csv')
+url_recovered = ('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/archived_data/archived_time_series/time_series_19-covid-Recovered_archived_0325.csv')
 
 # Writing the data into local csv files.
 get_data(url_confirmed, 'covid19_confirmed.csv')

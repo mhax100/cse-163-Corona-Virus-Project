@@ -39,30 +39,18 @@ app.layout = html.Div(
         html.Div(
             html.P('''The data for this visualization is from the Center for
                    Systems Science and Engingeering at Johns Hopkins University
-                   , and has many limitations. This visualization is in no way
-                   affiliated with or represents Johns Hopkins University. As
-                   information on Corona Virus and COVID-19 is constantly
-                   changing, the data presented here is likely to be
-                   updated more accurately as the state of available
-                   information evolves. In addition, the dataset only measures
-                   the number of Confirmed Cases (cases where the person has
-                   been officially confirmed via laboratory testing to be
-                   infected by COVID-19) and most likely does not represent
-                   the total number of cases worldwide. This could be because
-                   people who only present mild symptoms may never be tested
-                   and not every country is equipped to test every person.
-                   Regardless of the reason, the number of total cases is
-                   most likely larger than the number of confirmed cases.
+                   , and has many limitations. Do not use the information presented here as a 
+                   replacement for information from more legitimate sources such as the 
+                   WHO or Johns Hopkins. This visualization is in no way
+                   affiliated with or represents Johns Hopkins University. The data set
+                   used in this project is no longer maintained by Johns Hopkins and is now
+                   deprecated. For current statistics please visit Johns Hopkins' own dashboard.
                    ''',
                    style=text_style)
         ),
         html.Div([
-            html.P('''Furthermore, the visualizations here are by no means
-                   comprehensive and I encourage everyone to look at other
-                   sources to learn more about COVID-19. Should the dataset
-                   which these visualizations use change sifnificantly, the
-                   data presented could become innacurate or out of date. As
-                   such, I encourage people to double check the information.
+            html.P('''This was mainly developed as a class project with the intent
+                    of developing my skills with python, so data may be innacurate.
                    ''',
                    style=text_style)
         ]),

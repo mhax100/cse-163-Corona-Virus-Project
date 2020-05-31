@@ -12,5 +12,4 @@ A map depicting COVID-19 cases by region as of March 14, 2020.
 ![COVID-19 World Map 3/14/20](images/HubeivsChinaGraph.png)
 Side by side graphs depicting the number of confirmed cases, deaths, and recoveries over time in Italy and Hubei, China through March 14, 2020.
 
-#### Uses a deprecated version of the [Johns Hopkins dataset](https://github.com/CSSEGISandData/COVID-19/tree/master/archived_data/archived_time_series) (Will no longer work).
-Currently working on updating it to use the updated dataset.
+#### Uses a deprecated version of the [Johns Hopkins dataset](https://github.com/CSSEGISandData/COVID-19/tree/master/archived_data/archived_time_series), so data is no longer up to date.
